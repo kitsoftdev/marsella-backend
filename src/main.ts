@@ -18,14 +18,8 @@ import UsersRouter from './presentation/user_router';
 import app from './server';
 
 import firebase, { ServiceAccount } from 'firebase-admin';
-import { checkData02 } from './core/builtindata/load_data_02';
-import { checkData03 } from './core/builtindata/load_data_03';
-import { GoogleAuth } from './core/google_auth';
 import { BlobStorageSourceImpl } from './data/datasources/blob_storage_source';
-import { SettingModel } from './data/models/setting_model';
 import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
-import { RegisterUserPicture } from './domain/usecases/users/register_userpicture';
-import { UploadUserPicture } from './domain/usecases/users/upload_userpicture';
 
 dotenv.config();
 
@@ -50,8 +44,6 @@ export const googleApp = firebase.initializeApp({credential:firebase.credential.
     
 	///wrappers
 	const userMongo = new MongoWrapper<UserModel>('users', db);
-	const settingMongo = new MongoWrapper<SettingModel>('settings', db);
-	const cloudFileMongo = new MongoWrapper<SettingModel>('cloudfiles', db);
 	//datasources
 	const userDataSource = new UserDataSourceImpl(userMongo);
 
@@ -70,13 +62,8 @@ export const googleApp = firebase.initializeApp({credential:firebase.credential.
 	//repositorios
 	const userRepo = new UserRepositoryImpl(userDataSource);
 
-	const googleAuth = new GoogleAuth(googleApp);
-
-	const authRepo = new AuthRepositoryImpl(userDataSource, orgaDataSource, passDataSource, orgaUserDataSource, googleAuth, settingDataSource);
-	const settingRepo = new SettingRepositoryImpl(settingDataSource);
-
 	//revisa que los datos estén cargados.
-	await checkData01(roleDataSource, userDataSource, passDataSource, orgaDataSource, orgaUserDataSource, userMongo, roleMongo, passMongo, orgaMongo, orgaUserMongo);
+	await checkData01(userDataSource, userMongo,);
 
 	//routers
 
