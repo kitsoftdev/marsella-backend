@@ -20,6 +20,14 @@ import app from './server';
 import firebase, { ServiceAccount } from 'firebase-admin';
 import { BlobStorageSourceImpl } from './data/datasources/blob_storage_source';
 import { BlobServiceClient, StorageSharedKeyCredential } from '@azure/storage-blob';
+import { RoleModel } from './data/models/role_model';
+import { PasswordModel } from './data/models/password_model';
+import { OrgaModel } from './data/models/orga_model';
+import { OrgaUserModel } from './data/models/orgauser_model';
+import { RoleDataSourceImpl } from './data/datasources/role_data_source';
+import { PasswordDataSourceImpl } from './data/datasources/password_data_source';
+import { OrgaDataSourceImpl } from './data/datasources/orga_data_source';
+import { OrgaUserDataSourceImpl } from './data/datasources/orgauser_data_source';
 
 dotenv.config();
 
@@ -43,9 +51,17 @@ export const googleApp = firebase.initializeApp({credential:firebase.credential.
 	storageFiles.startContainer();
     
 	///wrappers
+	const roleMongo = new MongoWrapper<RoleModel>('roles', db);
 	const userMongo = new MongoWrapper<UserModel>('users', db);
+	const passMongo = new MongoWrapper<PasswordModel>('passes', db);
+	const orgaMongo = new MongoWrapper<OrgaModel>('orgas', db);
+	const orgaUserMongo = new MongoWrapper<OrgaUserModel>('orgasusers', db);
 	//datasources
+	const roleDataSource = new RoleDataSourceImpl(roleMongo);
 	const userDataSource = new UserDataSourceImpl(userMongo);
+	const passDataSource = new PasswordDataSourceImpl(passMongo);
+	const orgaDataSource = new OrgaDataSourceImpl(orgaMongo);
+	const orgaUserDataSource = new OrgaUserDataSourceImpl(orgaUserMongo);
 
 	const account = configEnv().AZSTORAGEACCOUNT_NAME;
 	const accountKey = configEnv().AZSTORAGEACCOUNT_KEY;
@@ -63,7 +79,7 @@ export const googleApp = firebase.initializeApp({credential:firebase.credential.
 	const userRepo = new UserRepositoryImpl(userDataSource);
 
 	//revisa que los datos estén cargados.
-	await checkData01(userDataSource, userMongo,);
+	await checkData01(roleDataSource, userDataSource, passDataSource, orgaDataSource, orgaUserDataSource, userMongo, roleMongo, passMongo, orgaMongo, orgaUserMongo);
 
 	//routers
 
