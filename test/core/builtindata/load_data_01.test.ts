@@ -11,7 +11,6 @@ import { OrgaUserModel } from '../../../src/data/models/orgauser_model';
 import { PasswordModel } from '../../../src/data/models/password_model';
 import { RoleModel } from '../../../src/data/models/role_model';
 import { UserModel } from '../../../src/data/models/user_model';
-import { PostModel } from '../../../src/data/models/workflow/post_model';
 import { NoSQLDatabaseWrapper } from '../../../src/core/wrappers/mongo_wrapper';
 
 class MockUserDataSource implements UserDataSource {
@@ -248,11 +247,11 @@ describe('Test del load data 01', () => {
 
 	});
 
-	const test_roleName = 'admin';
+	//const test_roleName = 'admin';
 	const test_roles = data_insert01.roles;
 	const test_users = data_insert01.users;
 	const test_orgas = data_insert01.orgas;
-	const test_orgausers = data_insert01.orgausers;
+	//const test_orgausers = data_insert01.orgausers;
 
 	test('Revisión de roles', () => {
 		//arrange
@@ -314,8 +313,6 @@ describe('Test del load data 01', () => {
 		const model_void_role = new ModelContainer<RoleModel>([]);
 		const model_con_user = ModelContainer.fromOneItem(new UserModel(test_users[1].id, test_users[1].name, test_users[1].username, test_users[1].email, test_users[1].enabled, test_users[1].builtIn));
 		const model_void_user = new ModelContainer<UserModel>([]);
-		const model_con_pass = ModelContainer.fromOneItem(new PasswordModel(model_con_user.items[0].id, 'hhh', 'sss', true, false));
-		const model_void_pass = new ModelContainer<PasswordModel>([]);
 		const model_con_orga = ModelContainer.fromOneItem(new OrgaModel(test_orgas[0].id, test_orgas[0].name, test_orgas[0].code, test_orgas[0].enabled, test_orgas[0].builtIn));
 		const model_void_orga = new ModelContainer<OrgaModel>([]);
 		const model_con_orus = ModelContainer.fromOneItem(new OrgaUserModel(model_con_orga.items[0].id, model_con_user.items[0].id, [model_con_role.items[0].toEntity()], true, false));
@@ -333,8 +330,6 @@ describe('Test del load data 01', () => {
 		jest.spyOn(mockUserDataSource, 'update').mockImplementation(() => Promise.resolve(model_con_user));			
 
 		jest.spyOn(mockPasswordDataSource, 'delete').mockImplementation(() => Promise.resolve(true));
-
-		jest.spyOn(mockPasswordDataSource, 'add').mockImplementation(() => Promise.resolve(model_con_pass));
 		
 		jest.spyOn(mockOrgaDataSource, 'getOne').mockImplementation(() => Promise.resolve(model_void_orga));
 

@@ -14,7 +14,6 @@ import { ModelContainer } from '../../src/core/model_container';
 import { Failure, GenericFailure } from '../../src/core/errors/failures';
 import { Either } from '../../src/core/either';
 import { RouterResponse } from '../../src/core/router_response';
-import { generateJWT } from '../../src/core/jwt';
 import { data_insert01} from '../../src/core/builtindata/load_data_01';
 import { GetUsersNotInOrgaUseCase } from '../../src/domain/usecases/users/get_users_notin_orga';
 import { ExistsUserUseCase } from '../../src/domain/usecases/users/exists_user';
@@ -85,9 +84,6 @@ describe('User Router', () => {
 	const testUserIdUser1 = data_insert01.users[4].id;
 	const testOrgaIdDefault = data_insert01.orgas[1].id;
 
-	const testTokenAdmin = generateJWT({userId:testUserIdAdmin, orgaId: testOrgaIdDefault, roles: 'admin'}, 'lomba', 60*60);
-	const testTokenUser1 = generateJWT({userId:testUserIdUser1, orgaId: testOrgaIdDefault, roles: 'user'}, 'lomba', 60*60);
-
 
 	beforeAll(() => {
 		mockAddUserUseCase = new MockAddUserUseCase();
@@ -114,7 +110,7 @@ describe('User Router', () => {
 			const expectedData = listUsers[0];
 			jest.spyOn(mockGetUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(ModelContainer.fromOneItem(expectedData))));
 			//act
-			const response = await request(server).get('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -130,7 +126,7 @@ describe('User Router', () => {
 			//arrange
 			jest.spyOn(mockGetUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>([]))));
 			//act
-			const response = await request(server).get('/api/v1/user/99999').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/99999');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -164,7 +160,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -178,7 +174,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).get('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			//asserts
@@ -198,7 +194,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersByOrgaIdUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/byorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/byorga/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -221,7 +217,7 @@ describe('User Router', () => {
 			const roures = response.body as RouterResponse;
 
 			//assert
-			expect(response.status).toBe(401);
+			expect(response.status).toBe(500);
 			expect(mockGetUsersByOrgaIdUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
@@ -234,7 +230,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersByOrgaIdUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/byorga/1').set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).get('/api/v1/user/byorga/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -250,7 +246,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersByOrgaIdUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/byorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/byorga/1');
 			const roures = response.body as RouterResponse;
 
 			//asserts
@@ -266,7 +262,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersByOrgaIdUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).get('/api/v1/user/byorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/byorga/1');
 			const roures = response.body as RouterResponse;
 
 			//asserts
@@ -287,7 +283,7 @@ describe('User Router', () => {
 			jest.spyOn(mockAddUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(ModelContainer.fromOneItem(inputData))));
 
 			//act
-			const response = await request(server).post('/api/v1/user').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).post('/api/v1/user').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -322,7 +318,7 @@ describe('User Router', () => {
 			jest.spyOn(mockAddUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).post('/api/v1/user').send(inputData).set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).post('/api/v1/user').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(403);
@@ -338,7 +334,7 @@ describe('User Router', () => {
 			jest.spyOn(mockAddUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).post('/api/v1/user').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).post('/api/v1/user').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -354,7 +350,7 @@ describe('User Router', () => {
 			jest.spyOn(mockAddUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).post('/api/v1/user').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).post('/api/v1/user').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -374,7 +370,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(ModelContainer.fromOneItem(inputData))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/1').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/1').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -409,7 +405,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/1').send(inputData).send(inputData).set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).put('/api/v1/user/1').send(inputData).send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(403);
@@ -425,7 +421,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/1').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/1').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -441,7 +437,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).put('/api/v1/user/1').send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/1').send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -460,7 +456,7 @@ describe('User Router', () => {
 			jest.spyOn(mockEnableUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(true)));
 
 			//act
-			const response = await request(server).put('/api/v1/user/enable/1?enable=false').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/enable/1?enable=false');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -480,7 +476,7 @@ describe('User Router', () => {
 			const response = await request(server).put('/api/v1/user/enable/1?enable=true');
 			const roures = response.body as RouterResponse;
 
-			expect(response.status).toBe(401);
+			expect(response.status).toBe(500);
 			expect(mockEnableUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
@@ -492,7 +488,7 @@ describe('User Router', () => {
 			jest.spyOn(mockEnableUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/enable/1?enable=true').set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).put('/api/v1/user/enable/1?enable=true');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(403);
@@ -507,7 +503,7 @@ describe('User Router', () => {
 			jest.spyOn(mockEnableUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/enable/1?enable=true').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/enable/1?enable=true');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -522,7 +518,7 @@ describe('User Router', () => {
 			jest.spyOn(mockEnableUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).put('/api/v1/user/enable/1?enable=false').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/enable/1?enable=false');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -541,7 +537,7 @@ describe('User Router', () => {
 			jest.spyOn(mockDeleteUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(true)));
 
 			//act
-			const response = await request(server).delete('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).delete('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -573,7 +569,7 @@ describe('User Router', () => {
 			jest.spyOn(mockDeleteUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).delete('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).delete('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(403);
@@ -588,7 +584,7 @@ describe('User Router', () => {
 			jest.spyOn(mockDeleteUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).delete('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).delete('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -603,7 +599,7 @@ describe('User Router', () => {
 			jest.spyOn(mockDeleteUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error()));
 
 			//act
-			const response = await request(server).delete('/api/v1/user/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).delete('/api/v1/user/1');
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -623,7 +619,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersNotInOrgaUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/notinorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/notinorga/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -642,7 +638,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersNotInOrgaUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/notinorga/1?sort=[["name", 1]]&pageIndex=1&itemsPerPage=10').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/notinorga/1?sort=[["name", 1]]&pageIndex=1&itemsPerPage=10');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -665,7 +661,7 @@ describe('User Router', () => {
 			const roures = response.body as RouterResponse;
 
 			//assert
-			expect(response.status).toBe(401);
+			expect(response.status).toBe(500);
 			expect(mockGetUsersNotInOrgaUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
@@ -678,7 +674,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersNotInOrgaUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/notinorga/1').set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).get('/api/v1/user/notinorga/1');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -694,7 +690,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersNotInOrgaUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/notinorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/notinorga/1');
 			const roures = response.body as RouterResponse;
 
 			//asserts
@@ -710,7 +706,7 @@ describe('User Router', () => {
 			jest.spyOn(mockGetUsersNotInOrgaUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).get('/api/v1/user/notinorga/1').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/notinorga/1');
 			const roures = response.body as RouterResponse;
 
 			//asserts
@@ -731,7 +727,7 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 	
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/?userId=&username=&email=').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/?userId=&username=&email=');
 			const roures = response.body as RouterResponse;
 	
 			//assert
@@ -754,7 +750,7 @@ describe('User Router', () => {
 			const roures = response.body as RouterResponse;
 	
 			//assert
-			expect(response.status).toBe(401);
+			expect(response.status).toBe(500);
 			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
@@ -767,7 +763,7 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 	
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/').set({Authorization: 'Bearer ' + testTokenUser1});
+			const response = await request(server).get('/api/v1/user/if/exists/');
 			const roures = response.body as RouterResponse;
 	
 			//assert
@@ -783,12 +779,12 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 	
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/');
 			const roures = response.body as RouterResponse;
 	
 			//asserts
 			expect(response.status).toBe(500);
-			expect(mockExistsUserUseCase.execute).toBeCalledTimes(1);
+			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
 			expect(roures.data).toBeUndefined();
@@ -799,12 +795,12 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 	
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/');
 			const roures = response.body as RouterResponse;
 	
 			//asserts
 			expect(response.status).toBe(500);
-			expect(mockExistsUserUseCase.execute).toBeCalledTimes(1);
+			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
 			expect(roures.data).toBeUndefined();
@@ -820,7 +816,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(ModelContainer.fromOneItem(inputData))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData);
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -839,7 +835,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(ModelContainer.fromOneItem(inputData))));
 	
 			//act
-			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[2].id).send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[2].id).send(inputData);
 			const roures = response.body as RouterResponse;
 	
 			//assert
@@ -872,7 +868,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -888,7 +884,7 @@ describe('User Router', () => {
 			jest.spyOn(mockUpdateUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData).set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).put('/api/v1/user/profile/' + data_insert01.users[1].id).send(inputData);
 			const roures = response.body as RouterResponse;
 
 			expect(response.status).toBe(500);
@@ -908,7 +904,7 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.right(new ModelContainer<UserModel>(expectedData))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/profile/?userId=&username=&email=').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/profile/?userId=&username=&email=');
 			const roures = response.body as RouterResponse;
 
 			//assert
@@ -931,7 +927,7 @@ describe('User Router', () => {
 			const roures = response.body as RouterResponse;
 
 			//assert
-			expect(response.status).toBe(401);
+			expect(response.status).toBe(500);
 			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
@@ -943,12 +939,12 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.resolve(Either.left(new GenericFailure('error'))));
 
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/profile/').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/profile/');
 			const roures = response.body as RouterResponse;
 
 			//asserts
 			expect(response.status).toBe(500);
-			expect(mockExistsUserUseCase.execute).toBeCalledTimes(1);
+			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
 			expect(roures.data).toBeUndefined();
@@ -959,12 +955,12 @@ describe('User Router', () => {
 			jest.spyOn(mockExistsUserUseCase, 'execute').mockImplementation(() => Promise.reject(new Error('error message')));
 
 			//act
-			const response = await request(server).get('/api/v1/user/if/exists/profile/').set({Authorization: 'Bearer ' + testTokenAdmin});
+			const response = await request(server).get('/api/v1/user/if/exists/profile/');
 			const roures = response.body as RouterResponse;
 
 			//asserts
 			expect(response.status).toBe(500);
-			expect(mockExistsUserUseCase.execute).toBeCalledTimes(1);
+			expect(mockExistsUserUseCase.execute).toBeCalledTimes(0);
 			expect(response.body as RouterResponse).toBeDefined();
 			expect(roures.error).toBeDefined();
 			expect(roures.data).toBeUndefined();

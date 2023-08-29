@@ -7,8 +7,6 @@ import { GetUserUseCase } from '../domain/usecases/users/get_user';
 import { GetUsersByOrgaIdUseCase } from '../domain/usecases/users/get_users_by_orga';
 import { UpdateUserUseCase } from '../domain/usecases/users/update_user';
 import { RouterResponse } from '../core/router_response';
-import { isAuth } from '../core/presentation/valid_token_router';
-import { hasRole } from '../core/presentation/check_role_router';
 import { GetUsersNotInOrgaUseCase } from '../domain/usecases/users/get_users_notin_orga';
 import { ExistsUserUseCase } from '../domain/usecases/users/exists_user';
 
@@ -137,7 +135,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.post('/',[isAuth, hasRole(['admin', 'super'])], async (req: Request, res: Response) => {
+	router.post('/', async (req: Request, res: Response) => {
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();
@@ -162,7 +160,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 	
-	router.put('/:id',[isAuth, hasRole(['admin', 'super'])], async (req: Request, res: Response) => {
+	router.put('/:id', async (req: Request, res: Response) => {
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();		
@@ -187,7 +185,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.put('/enable/:id',[isAuth, hasRole(['admin', 'super'])], async (req: Request<{id:string}>, res: Response) => {
+	router.put('/enable/:id', async (req: Request<{id:string}>, res: Response) => {
 		const text = (req.query.enable === 'false' ? false : true) ? 'enabled' : 'disabled';
 		//definitions
 		let code = 500;
@@ -213,7 +211,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.delete('/:id',[isAuth, hasRole(['admin', 'super'])], async (req: Request<{id:string}>, res: Response) => {
+	router.delete('/:id', async (req: Request<{id:string}>, res: Response) => {
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();			
@@ -239,7 +237,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.get('/if/exists/',[isAuth, hasRole(['admin', 'super'])], async (req: Request<{userId:string,username:string,email:string}>, res: Response) => {	
+	router.get('/if/exists/', async (req: Request<{userId:string,username:string,email:string}>, res: Response) => {	
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();
@@ -267,7 +265,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.put('/profile/:id',[isAuth], async (req: Request, res: Response) => {
+	router.put('/profile/:id', async (req: Request, res: Response) => {
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();		
@@ -299,7 +297,7 @@ export default function UsersRouter(
 		res.status(code).send(toSend);
 	});
 
-	router.get('/if/exists/profile/',[isAuth], async (req: Request<{username:string,email:string, r_userId:string}>, res: Response) => {	
+	router.get('/if/exists/profile/', async (req: Request<{username:string,email:string, r_userId:string}>, res: Response) => {	
 		//definitions
 		let code = 500;
 		let toSend = RouterResponse.emptyResponse();
