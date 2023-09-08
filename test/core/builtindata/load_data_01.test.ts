@@ -317,6 +317,7 @@ describe('Test del load data 01', () => {
 		const model_void_orga = new ModelContainer<OrgaModel>([]);
 		const model_con_orus = ModelContainer.fromOneItem(new OrgaUserModel(model_con_orga.items[0].id, model_con_user.items[0].id, [model_con_role.items[0].toEntity()], true, false));
 		const model_void_orus = new ModelContainer<OrgaUserModel>([]);
+		const model_con_pass = ModelContainer.fromOneItem(new PasswordModel(test_users[1].id, '', '', test_users[1].enabled, false));
 
 
 		jest.spyOn(mockRoleDataSource, 'getOne').mockImplementation(() => Promise.resolve(model_void_role));
@@ -331,6 +332,9 @@ describe('Test del load data 01', () => {
 
 		jest.spyOn(mockPasswordDataSource, 'delete').mockImplementation(() => Promise.resolve(true));
 		
+
+		jest.spyOn(mockPasswordDataSource, 'add').mockImplementation(() => Promise.resolve(model_con_pass));
+
 		jest.spyOn(mockOrgaDataSource, 'getOne').mockImplementation(() => Promise.resolve(model_void_orga));
 
 		jest.spyOn(mockOrgaDataSource, 'add').mockImplementation(() => Promise.resolve(model_con_orga));
