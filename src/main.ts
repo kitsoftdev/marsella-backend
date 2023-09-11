@@ -31,8 +31,6 @@ import { OrgaUserDataSourceImpl } from './data/datasources/orgauser_data_source'
 
 dotenv.config();
 
-export const googleApp = firebase.initializeApp({credential:firebase.credential.cert(JSON.parse(configEnv().FIREBASE_CERT) as ServiceAccount)});
-
 (async () => {
 	console.log('NODE_ENV: ' + configEnv().NODE_ENV);
 	console.log('PORT: ' + configEnv().PORT);
